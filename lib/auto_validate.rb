@@ -95,8 +95,9 @@ EOS
   end
 
   def load_unique_indexes
-    res = connection.execute <<EOS
-select *
+    # alternatively - fetch all indexes in a single query?
+    res = connection.select_values <<EOS
+select indexdef
 from pg_index, pg_class, pg_indexes
 where pg_class.oid = pg_index.indexrelid
   and pg_indexes.indexname = pg_class.relname
@@ -104,7 +105,6 @@ where pg_class.oid = pg_index.indexrelid
   and not pg_index.indisprimary
   and pg_index.indisunique
 EOS
-    res.map {|x| x["indexdef"]}
   end
 
   def locate_primary_key
