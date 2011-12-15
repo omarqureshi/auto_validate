@@ -25,6 +25,8 @@ To install simply add the following to your Gemfile
 
 Simply insert auto_validate in your class
 
-`class Foo < ActiveRecord::Base
+<pre><code>
+class Foo < ActiveRecord::Base
   auto_validate
-end`
+end
+</code></pre>
