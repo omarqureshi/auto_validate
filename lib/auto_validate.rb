@@ -125,7 +125,7 @@ EOS
           validates_inclusion_of res["attname"].to_sym, :in => [true, false]
         end
       else
-        if res["attnotnull"] == 't'
+        if res["attnotnull"] == 't' && res["atthasdef"] == 'f'
           self.class_eval do
             validates_presence_of res["attname"].to_sym
           end
