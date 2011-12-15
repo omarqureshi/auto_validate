@@ -16,7 +16,7 @@ Currently supports the following constraints:
 
 ## INSTALL ##
 
-To install simply
+To install simply add the following to your Gemfile
 
 `gem 'auto_validate', :git =>
 "git://github.com/omarqureshi/auto_validate.git"`
