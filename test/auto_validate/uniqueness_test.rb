@@ -36,4 +36,12 @@ class UniquenessTest < Test::Unit::TestCase
     assert q.errors[:code].any?
   end
 
+  def test_should_correcty_enforce_uniqueness_on_multicolumn_indexes
+    f = User.new(:email => "test@test.com",
+                 :password => "test",
+                 :password_confirmation => "test")
+    assert f.save
+    t = Tag.create(:name => "Foo")
+  end
+
 end

@@ -67,12 +67,12 @@ require "active_record"
 
 
 module AutoValidate
-  mattr_accessor :constraints, :indexes, :defined_primary_key
+  mattr_accessor :attributes, :indexes, :defined_primary_key
   extend ActiveSupport::Memoizable
 
   def auto_validate
     self.defined_primary_key = locate_primary_key
-    self.constraints = load_constraints
+    self.attributes = load_attributes
     self.indexes = load_unique_indexes
     add_validates_presence_of_and_boolean_validations
     add_validates_uniqueness_of
@@ -81,12 +81,13 @@ module AutoValidate
 
   private
 
-  def load_constraints
+  def load_attributes
     str = "and attname != '#{defined_primary_key}'" if defined_primary_key
     connection.execute <<EOS
-select pg_attribute.*
-from pg_attribute, pg_class
+select pg_attribute.*, typcategory
+from pg_attribute, pg_class, pg_type
 where pg_class.oid = pg_attribute.attrelid
+  and pg_type.oid = pg_attribute.atttypid
   and relname = '#{self.table_name}'
   and attnum > 0
   and not attisdropped
@@ -121,22 +122,17 @@ EOS
   end
 
   def add_validates_presence_of_and_boolean_validations
-    requiring_validation = constraints.reduce({:null => [], :bool => []}) do |mem, res|
+    attributes.each do |res|
       if res["atttypid"] == boolean_type
-        mem[:bool] << res
+        self.class_eval do
+          validates_inclusion_of res["attname"].to_sym, :in => [true, false]
+        end
       else
-        mem[:null] << res if res["attnotnull"] == 't'
-      end
-      mem
-    end
-    requiring_validation[:null].each do |res|
-      self.class_eval do
-        validates_presence_of res["attname"].to_sym
-      end
-    end
-    requiring_validation[:bool].each do |res|
-      self.class_eval do
-        validates_inclusion_of res["attname"].to_sym, :in => [true, false]
+        if res["attnotnull"] == 't'
+          self.class_eval do
+            validates_presence_of res["attname"].to_sym
+          end
+        end
       end
     end
   end
@@ -173,6 +169,19 @@ EOS
   end
 
   def add_validates_numericality_of
+    attributes.each do |attribute|
+      if attribute["typcategory"] == "N"
+        # convert attlen to number bit count, use as power of 2 and
+        # divide by 2 to take into account negativity - 1
+        # i.e. for integer (attlen 4)
+        # this becomes 2 ** (4*8) then divide by 2 and -1 so that the
+        # range of -2147483648 to +2147483647 is captured
+        maxsize = ((2 ** (attribute["attlen"].to_i * 8)) / 2) - 1
+        self.class_eval do
+          validates_numericality_of attribute["attname"].to_sym, :less_than => maxsize
+        end
+      end
+    end
   end
 
   def boolean_type
