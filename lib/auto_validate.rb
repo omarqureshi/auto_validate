@@ -174,8 +174,9 @@ EOS
         # this becomes 2 ** (4*8) then divide by 2 and -1 so that the
         # range of -2147483648 to +2147483647 is captured
         maxsize = ((2 ** (attribute["attlen"].to_i * 8)) / 2) - 1
+        minsize = 0-maxsize-1
         self.class_eval do
-          validates_numericality_of attribute["attname"].to_sym, :less_than => maxsize
+          validates_numericality_of attribute["attname"].to_sym, :less_than => maxsize, :greater_than => minsize
         end
       end
     end
