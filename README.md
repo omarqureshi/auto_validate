@@ -18,5 +18,5 @@ Currently supports the following constraints:
 
 To install simply
 
-`gem 'auto\_validate', :git =>
-"git://github.com/omarqureshi/auto\_validate.git"`
+`gem 'auto_validate', :git =>
+"git://github.com/omarqureshi/auto_validate.git"`
