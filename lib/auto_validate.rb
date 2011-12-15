@@ -8,7 +8,6 @@ require "active_record"
 #
 # Reference for this class is at
 # http://www.postgresql.org/docs/current/static/catalog-pg-constraint.html
-# Also - it's advisable to read up on pg_get_constraintdef()
 #
 # For null constraints, something like this is possible:
 #
@@ -60,8 +59,6 @@ require "active_record"
 # maybe?
 #
 # TODO:
-# * Numericality checks
-# * Length checks - not sure how to tackle lower bound
 # * Check constraints with an in clause
 # * Unique index checks without having to parse the SQL
 
