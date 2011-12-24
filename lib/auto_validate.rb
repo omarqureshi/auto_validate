@@ -65,7 +65,6 @@ require "active_record"
 
 module AutoValidate
   mattr_accessor :attributes, :indexes, :defined_primary_key
-  extend ActiveSupport::Memoizable
 
   def auto_validate
     self.defined_primary_key = locate_primary_key
@@ -183,11 +182,12 @@ EOS
   end
 
   def boolean_type
-    connection.select_value <<EOS
+    unless defined? @_boolean_type
+      @_boolean_type = connection.select_value <<EOS
 select oid from pg_type where typname = 'bool'
 EOS
+    end
   end
-  memoize :boolean_type
 
 end
 
