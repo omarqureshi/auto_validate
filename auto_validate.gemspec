@@ -8,8 +8,8 @@ Gem::Specification.new do |s|
   s.authors     = ["Omar Qureshi"]
   s.email       = ["omar@omarqureshi.net"]
   s.homepage    = "http://omarqureshi.net"
-  s.summary     = %q{TODO: Write a gem summary}
-  s.description = %q{TODO: Write a gem description}
+  s.summary     = %q{Automatic validations for ActiveRecord}
+  s.description = %q{This gem looks at the schema for any validations that it can easily apply based on known db constraints and adds application level validations for them}
 
   s.rubyforge_project = "auto_validate"
 
