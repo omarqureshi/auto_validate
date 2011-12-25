@@ -67,12 +67,14 @@ module AutoValidate
   mattr_accessor :attributes, :indexes, :defined_primary_key
 
   def auto_validate
-    self.defined_primary_key = locate_primary_key
-    self.attributes = load_attributes
-    self.indexes = load_unique_indexes
-    add_validates_presence_of_and_boolean_validations
-    add_validates_uniqueness_of
-    add_validates_numericality_of
+    if connection.table_exists?(table_name)
+      self.defined_primary_key = locate_primary_key
+      self.attributes = load_attributes
+      self.indexes = load_unique_indexes
+      add_validates_presence_of_and_boolean_validations
+      add_validates_uniqueness_of
+      add_validates_numericality_of
+    end
   end
 
   private
