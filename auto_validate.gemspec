@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
 
-  # specify any dependencies here; for
+  s.add_development_dependency "rake", ">=0.9.2"
   s.add_development_dependency "shoulda"
   s.add_development_dependency "shoulda-matchers"
   s.add_development_dependency "shoulda-context"
@@ -27,8 +27,4 @@ Gem::Specification.new do |s|
   s.add_development_dependency "bcrypt-ruby"
   s.add_development_dependency "database_cleaner"
   s.add_runtime_dependency "rails"
-
-  # s.add_development_dependency "mysql"
-  # s.add_development_dependency "sqlite"
-  # s.add_runtime_dependency "rest-client"
 end

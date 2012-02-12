@@ -5,7 +5,6 @@ require "active_record"
 # proof of concept - currently all tests are running solely against
 # 9.1, though a lot of this should work for anything over 8
 #
-#
 # Reference for this class is at
 # http://www.postgresql.org/docs/current/static/catalog-pg-constraint.html
 #
@@ -61,6 +60,9 @@ require "active_record"
 # TODO:
 # * Check constraints with an in clause
 # * Unique index checks without having to parse the SQL
+# * Figure out how to reuse the pg_attr query that ActiveRecord uses
+# in Rails 3.0+ or indeed modify it so that there are less table
+# introspection queries to be done.
 
 
 module AutoValidate
@@ -155,15 +157,31 @@ EOS
   end
 
   def add_case_sensitive_validates_uniqueness_of(attr)
+    index = multicolumn_index(attr)
+    scope = index[1..-1]
     self.class_eval do
-      validates_uniqueness_of attr.to_sym
+      if scope.empty?
+        validates_uniqueness_of index[0].to_sym
+      else
+        validates_uniqueness_of index[0].to_sym, :scope => scope
+      end
     end
   end
 
   def add_case_insensitive_validates_uniqueness_of(attr)
+    index = multicolumn_index(attr)
+    scope = index[1..-1]
     self.class_eval do
-      validates_uniqueness_of attr.to_sym, :case_sensitive => false
+      if scope.empty?
+        validates_uniqueness_of attr.to_sym, :case_sensitive => false
+      else
+        validates_uniqueness_of attr.to_sym, :case_sensitive => false, :scope => scope
+      end
     end
+  end
+
+  def multicolumn_index(attr)
+    attr.split(",").map(&:strip)
   end
 
   def add_validates_numericality_of

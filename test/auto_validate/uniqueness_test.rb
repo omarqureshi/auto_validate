@@ -42,6 +42,10 @@ class UniquenessTest < Test::Unit::TestCase
                  :password_confirmation => "test")
     assert f.save
     t = Tag.create(:name => "Foo")
+    tagging = f.taggings.build(:tag => t)
+    assert tagging.save
+    another_tagging = f.taggings.build(:tag => t)
+    deny another_tagging.save
   end
 
 end
