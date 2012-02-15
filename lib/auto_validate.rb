@@ -83,8 +83,10 @@ module AutoValidate
 
   def load_attributes
     str = "and attname != '#{defined_primary_key}'" if defined_primary_key
-    timestamps = "and (attname != 'created_at' or attname != 'updated_at'
-                   or attname != 'created_on' or attname != 'updated_on')"
+    timestamps = "and attname != 'created_at'
+                  and attname != 'updated_at'
+                  and attname != 'created_on'
+                  and attname != 'updated_on'"
     connection.execute <<EOS
 select pg_attribute.*, typcategory
 from pg_attribute, pg_class, pg_type
