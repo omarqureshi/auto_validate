@@ -68,6 +68,23 @@ require "active_record"
 module AutoValidate
   mattr_accessor :attributes, :indexes, :defined_primary_key
 
+  # Public: create validations based on the db schema
+  # 
+  # if the table does not exist (i.e - yet to be created because of
+  # rake db:migrate) - this does not apply migrations
+  #
+  # Examples:
+  # 
+  # class Person < ActiveRecord::Base
+  #   auto_validate
+  # end
+  # 
+  # adds validations such as:
+  # * uniquness
+  # * numericality
+  # * boolean field checks
+  # * presence
+  
   def auto_validate
     if connection.table_exists?(table_name)
       self.defined_primary_key = locate_primary_key
@@ -80,6 +97,9 @@ module AutoValidate
   end
 
   private
+
+  # Internal: stores attributes that we would want to check for the
+  # presence / boolean / numericality checks
 
   def load_attributes
     str = "and attname != '#{defined_primary_key}'" if defined_primary_key
@@ -100,6 +120,8 @@ where pg_class.oid = pg_attribute.attrelid
 EOS
   end
 
+  # Internal: stores all the unique indexes that the table uses
+  
   def load_unique_indexes
     # alternatively - fetch all indexes in a single query?
     res = connection.select_values <<EOS
@@ -113,6 +135,9 @@ where pg_class.oid = pg_index.indexrelid
 EOS
   end
 
+  # Internal: Figures out whether the table has a primary key and
+  # stores it
+
   def locate_primary_key
     connection.select_value <<EOS
 select pg_attribute.attname
@@ -125,6 +150,15 @@ where
   and indisprimary
 EOS
   end
+
+  # Internal: goes through all the stored attributes and applies
+  # presence validations in a manner similar to
+  #
+  #    validates_presence_of :foo
+  #
+  # or if the field is a boolean field
+  #
+  #    validates_inclusion_of :foo, :in => [true, false]
 
   def add_validates_presence_of_and_boolean_validations
     attributes.each do |res|
@@ -141,6 +175,9 @@ EOS
       end
     end
   end
+
+  # Internal: goes through all the indexes and parses the index
+  # statement
 
   def add_validates_uniqueness_of
     indexes.reduce({}) do |mem, res|
